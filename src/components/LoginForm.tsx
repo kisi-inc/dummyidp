@@ -86,8 +86,8 @@ export function LoginForm({
 
       setAssertion(
         await encodeAssertion(key, {
-          responseId: crypto.randomUUID(),
-          assertionId: crypto.randomUUID(),
+          responseId: `_${crypto.randomUUID()}`,
+          assertionId: `_${crypto.randomUUID()}`,
           idpEntityId: appIdpEntityId(app),
           subjectId: user.email,
           firstName: user.firstName,
