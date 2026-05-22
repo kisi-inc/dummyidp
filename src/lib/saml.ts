@@ -48,7 +48,7 @@ function createAssertionElement(
   <saml2:Subject>
     <saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">${data.subjectId}</saml2:NameID>
     <saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
-      <saml2:SubjectConfirmationData InResponseTo="${data.sessionId}" NotOnOrAfter="${data.expire}" Recipient="${data.spAcsUrl}"></saml2:SubjectConfirmationData>
+      <saml2:SubjectConfirmationData ${data.sessionId ? `InResponseTo="${data.sessionId}" ` : ""}NotOnOrAfter="${data.expire}" Recipient="${data.spAcsUrl}"></saml2:SubjectConfirmationData>
     </saml2:SubjectConfirmation>
   </saml2:Subject>
   <saml2:Conditions NotBefore="${data.now}" NotOnOrAfter="${data.expire}">
@@ -114,7 +114,7 @@ function createResponseElement(
   assertionElement: string,
 ): string {
   return xml`
-<saml2p:Response xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol" Destination="${data.spAcsUrl}" ID="${data.responseId}" InResponseTo="${data.sessionId}" IssueInstant="${data.now}" Version="2.0">
+<saml2p:Response xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol" Destination="${data.spAcsUrl}" ID="${data.responseId}" ${data.sessionId ? `InResponseTo="${data.sessionId}" ` : ""}IssueInstant="${data.now}" Version="2.0">
   <saml2:Issuer xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">${data.idpEntityId}</saml2:Issuer>
   ${createStatusSuccessElement()}
   ${assertionElement}
