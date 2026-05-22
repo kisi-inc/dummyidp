@@ -60,9 +60,9 @@ function createAssertionElement(
     </saml2:AuthnContext>
   </saml2:AuthnStatement>
   <saml2:AttributeStatement>
-    <saml2:Attribute Name="email"><saml2:AttributeValue>${data.subjectId}</saml2:AttributeValue></saml2:Attribute>
-    <saml2:Attribute Name="firstName"><saml2:AttributeValue>${data.firstName}</saml2:AttributeValue></saml2:Attribute>
-    <saml2:Attribute Name="lastName"><saml2:AttributeValue>${data.lastName}</saml2:AttributeValue></saml2:Attribute>
+    <saml2:Attribute Name="Email"><saml2:AttributeValue>${data.subjectId}</saml2:AttributeValue></saml2:Attribute>
+    <saml2:Attribute Name="FirstName"><saml2:AttributeValue>${data.firstName}</saml2:AttributeValue></saml2:Attribute>
+    <saml2:Attribute Name="LastName"><saml2:AttributeValue>${data.lastName}</saml2:AttributeValue></saml2:Attribute>
   </saml2:AttributeStatement>
 </saml2:Assertion>`;
 }
