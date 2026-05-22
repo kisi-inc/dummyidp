@@ -1,8 +1,8 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import moment from "moment";
 import { z } from "zod";
-
-import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,18 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { App, appIdpEntityId, AppUser } from "@/lib/app";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { App, appIdpEntityId } from "@/lib/app";
 import { encodeAssertion } from "@/lib/saml";
-import moment from "moment";
-import { XmlCodeBlock } from "@/components/XmlCodeBlock";
-import formatXml from "xml-formatter";
 import { INSECURE_PRIVATE_KEY } from "@/lib/insecure-cert";
 
 const FormSchema = z.object({
@@ -96,11 +86,13 @@ export function LoginForm({
 
       setAssertion(
         await encodeAssertion(key, {
+          responseId: crypto.randomUUID(),
           assertionId: crypto.randomUUID(),
           idpEntityId: appIdpEntityId(app),
           subjectId: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          spAcsUrl: app.spAcsUrl!,
           spEntityId: app.spEntityId!,
           sessionId: sessionId,
           now: now.format(),
@@ -115,7 +107,7 @@ export function LoginForm({
   }, [assertion]);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  function handleSubmit(data: z.infer<typeof FormSchema>) {
+  function handleSubmit(_: z.infer<typeof FormSchema>) {
     inputRef.current!.value = assertion;
     inputRef.current!.form!.action = app.spAcsUrl!;
     inputRef.current!.form!.submit();

@@ -16,20 +16,33 @@ export type AppUser = {
   lastName: string;
 };
 
+function getBaseUrl(): string {
+  const url =
+    process.env.NEXT_PUBLIC_DUMMYIDP_CUSTOM_DOMAIN ??
+    process.env.VERCEL_URL ??
+    "https://dummyidp.com";
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  return url.startsWith("localhost") ? `http://${url}` : `https://${url}`;
+}
+
 export function appIdpEntityId(app: App): string {
-  return `https://dummyidp.com/apps/${app.id}`;
+  return `${getBaseUrl()}/apps/${app.id}`;
 }
 
 export function appIdpRedirectUrl(app: App): string {
-  return `https://${process.env.NEXT_PUBLIC_DUMMYIDP_CUSTOM_DOMAIN || process.env.VERCEL_URL}/apps/${app.id}/sso`;
+  return `${getBaseUrl()}/apps/${app.id}/sso`;
 }
 
 export function appIdpMetadataUrl(app: App): string {
-  return `https://${process.env.NEXT_PUBLIC_DUMMYIDP_CUSTOM_DOMAIN || process.env.VERCEL_URL}/apps/${app.id}/metadata`;
+  return `${getBaseUrl()}/apps/${app.id}/metadata`;
 }
 
 export function appLoginUrl(app: App): string {
-  return `https://${process.env.NEXT_PUBLIC_DUMMYIDP_CUSTOM_DOMAIN || process.env.VERCEL_URL}/apps/${app.id}/login`;
+  return `${getBaseUrl()}/apps/${app.id}/login`;
 }
 
 export async function createApp(): Promise<string> {
@@ -146,7 +159,7 @@ async function scimUserByEmail(
 
   // in practice, SCIM servers put the results into either `resources` or
   // `Resources`
-  const resources = listBody?.resources ?? listBody?.Resources ?? []
+  const resources = listBody?.resources ?? listBody?.Resources ?? [];
   if (resources.length > 0) {
     return resources[0].id;
   }

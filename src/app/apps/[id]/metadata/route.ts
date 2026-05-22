@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getApp } from "@/lib/app";
 import { appIdpEntityId, appIdpRedirectUrl, appLoginUrl } from "@/lib/app";
-import { INSECURE_PUBLIC_CERTIFICATE } from "@/lib/insecure-cert";
+import { INSECURE_PUBLIC_CERTIFICATE_CONTENT } from "@/lib/insecure-cert";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
-  const prefix = "-----BEGIN CERTIFICATE-----\n";
-  const suffix = "-----END CERTIFICATE-----";
-  const certNoPEMHeaders = INSECURE_PUBLIC_CERTIFICATE.substring(
-    0,
-    INSECURE_PUBLIC_CERTIFICATE.length - suffix.length,
-  )
-    .substring(prefix.length)
-    .replaceAll("\n", "");
-
   const app = await getApp(params.id);
   return new NextResponse(
     `<?xml version="1.0" encoding="UTF-8"?>
@@ -24,7 +15,7 @@ export async function GET(
     <md:KeyDescriptor use="signing">
       <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
         <ds:X509Data>
-          <ds:X509Certificate>${certNoPEMHeaders}</ds:X509Certificate>
+          <ds:X509Certificate>${INSECURE_PUBLIC_CERTIFICATE_CONTENT}</ds:X509Certificate>
         </ds:X509Data>
       </ds:KeyInfo>
     </md:KeyDescriptor>
