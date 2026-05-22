@@ -81,8 +81,8 @@ export function LoginForm({
         ["sign"],
       );
 
-      const now = moment(new Date()).add(-1, "hour");
-      const expire = moment(new Date()).add(1, "hour");
+      const now = moment().utc().subtract(1, "hour");
+      const expire = moment().utc().add(1, "hour");
 
       setAssertion(
         await encodeAssertion(key, {

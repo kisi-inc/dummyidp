@@ -54,6 +54,11 @@ function createAssertionElement(
   <saml2:Conditions NotBefore="${data.now}" NotOnOrAfter="${data.expire}">
     <saml2:AudienceRestriction><saml2:Audience>${data.spEntityId}</saml2:Audience></saml2:AudienceRestriction>
   </saml2:Conditions>
+  <saml2:AuthnStatement AuthnInstant="${data.now}" SessionIndex="${data.assertionId}">
+    <saml2:AuthnContext>
+      <saml2:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml2:AuthnContextClassRef>
+    </saml2:AuthnContext>
+  </saml2:AuthnStatement>
   <saml2:AttributeStatement>
     <saml2:Attribute Name="email"><saml2:AttributeValue>${data.subjectId}</saml2:AttributeValue></saml2:Attribute>
     <saml2:Attribute Name="firstName"><saml2:AttributeValue>${data.firstName}</saml2:AttributeValue></saml2:Attribute>
