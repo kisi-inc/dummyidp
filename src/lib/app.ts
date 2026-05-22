@@ -102,31 +102,33 @@ export async function upsertApp(app: App): Promise<void> {
     // For each user, list users filtered by email address. If we get a result,
     // PUT against the resulting user ID. If we don't get a result, POST a new
     // user. Do not persist state about assigned user IDs between syncs.
+    const scimHeaders = {
+      Authorization: `Bearer ${app.scimBearerToken}`,
+      "Content-Type": "application/scim+json",
+      Accept: "application/scim+json",
+    };
+    const userBody = (user: AppUser) => ({
+      schemas: ["urn:ietf:params:scim:schemas:core:2.0:User"],
+      userName: user.email,
+      name: {
+        givenName: user.firstName,
+        familyName: user.lastName,
+      },
+    });
+
     for (const user of app.users) {
       const userId = await scimUserByEmail(app, user.email);
       if (userId) {
         await fetch(`${app.scimBaseUrl}/Users/${userId}`, {
           method: "PUT",
-          headers: { Authorization: `Bearer ${app.scimBearerToken}` },
-          body: JSON.stringify({
-            userName: user.email,
-            name: {
-              givenName: user.firstName,
-              familyName: user.lastName,
-            },
-          }),
+          headers: scimHeaders,
+          body: JSON.stringify(userBody(user)),
         });
       } else {
         await fetch(`${app.scimBaseUrl}/Users`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${app.scimBearerToken}` },
-          body: JSON.stringify({
-            userName: user.email,
-            name: {
-              givenName: user.firstName,
-              familyName: user.lastName,
-            },
-          }),
+          headers: scimHeaders,
+          body: JSON.stringify(userBody(user)),
         });
       }
     }
@@ -137,7 +139,7 @@ export async function upsertApp(app: App): Promise<void> {
       if (userId) {
         await fetch(`${app.scimBaseUrl}/Users/${userId}`, {
           method: "DELETE",
-          headers: { Authorization: `Bearer ${app.scimBearerToken}` },
+          headers: scimHeaders,
         });
       }
     }
