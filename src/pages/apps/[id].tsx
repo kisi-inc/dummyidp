@@ -29,6 +29,7 @@ import { INSECURE_PUBLIC_CERTIFICATE } from "@/lib/insecure-cert";
 import { SPSettingsForm } from "@/components/SPSettingsForm";
 import { SCIMSettingsForm } from "@/components/SCIMSettingsForm";
 import { UsersSettingsForm } from "@/components/UsersSettingsForm";
+import { GroupsSettingsForm } from "@/components/GroupsSettingsForm";
 import Head from "next/head";
 
 export default function Page() {
@@ -170,6 +171,21 @@ export default function Page() {
               </CardHeader>
               <CardContent>
                 {app && <UsersSettingsForm app={app} />}
+              </CardContent>
+            </Card>
+            <Card className="col-span-6">
+              <CardHeader>
+                <CardTitle>
+                  Groups
+                  <DocsLink to="https://ssoready.com/docs/dummyidp#scim-settings" />
+                </CardTitle>
+                <CardDescription>
+                  Groups of users, synced over SCIM if you've configured it.
+                  Members are chosen from the users above.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {app && <GroupsSettingsForm app={app} />}
               </CardContent>
             </Card>
           </div>
