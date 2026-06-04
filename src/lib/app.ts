@@ -175,8 +175,13 @@ export async function upsertApp(app: App): Promise<void> {
 
     // Sync groups. This mirrors the user sync above and is likewise stateless:
     // for each group, list groups filtered by displayName. If we get a result,
-    // the group already exists, so we PATCH its members. If not, POST a new
-    // group with its members inline.
+    // the group already exists; otherwise POST to create it and use the
+    // returned id.
+    //
+    // We then always PATCH the membership separately rather than relying on
+    // members sent in the POST body: many SCIM servers (Okta, Azure, Kisi, ...)
+    // ignore `members` on group creation and only accept membership changes via
+    // a PatchOp. Creating then PATCHing matches how real IDPs behave.
     //
     // Members must be referenced by SCIM user ID, so we resolve each member
     // email to its ID at sync time. Users are synced before groups above, so
@@ -190,11 +195,24 @@ export async function upsertApp(app: App): Promise<void> {
         }
       }
 
-      const groupId = await scimGroupByDisplayName(app, group.displayName);
+      let groupId = await scimGroupByDisplayName(app, group.displayName);
+      if (!groupId) {
+        const createResponse = await fetch(`${app.scimBaseUrl}/Groups`, {
+          method: "POST",
+          headers: scimHeaders,
+          body: JSON.stringify({
+            schemas: ["urn:ietf:params:scim:schemas:core:2.0:Group"],
+            displayName: group.displayName,
+            members: memberIds.map((value) => ({ value })),
+          }),
+        });
+        const createBody = await createResponse.json();
+        groupId = createBody?.id;
+      }
+
+      // PATCH the membership to exactly the resolved set, replacing whatever
+      // was there before.
       if (groupId) {
-        // PATCH the membership to exactly the resolved set, replacing whatever
-        // was there before. Okta and others expect group membership updates as
-        // PatchOps rather than a full-resource PUT.
         await fetch(`${app.scimBaseUrl}/Groups/${groupId}`, {
           method: "PATCH",
           headers: scimHeaders,
@@ -207,16 +225,6 @@ export async function upsertApp(app: App): Promise<void> {
                 value: memberIds.map((value) => ({ value })),
               },
             ],
-          }),
-        });
-      } else {
-        await fetch(`${app.scimBaseUrl}/Groups`, {
-          method: "POST",
-          headers: scimHeaders,
-          body: JSON.stringify({
-            schemas: ["urn:ietf:params:scim:schemas:core:2.0:Group"],
-            displayName: group.displayName,
-            members: memberIds.map((value) => ({ value })),
           }),
         });
       }
